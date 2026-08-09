@@ -12,6 +12,7 @@ It provides a dark technical interface for individual and group control, native 
 ## Contents
 
 - [Why this project exists](#why-this-project-exists)
+- [Companion Android and iOS projects](#companion-android-and-ios-projects)
 - [A short history of Sphero Star Wars droids](#a-short-history-of-sphero-star-wars-droids)
 - [Finding a droid today](#finding-a-droid-today)
 - [Features](#features)
@@ -32,6 +33,15 @@ Sphero's licensed Star Wars droids combined unusually expressive physical hardwa
 Control Deck provides a desktop-oriented way to continue using compatible droids through their BLE interfaces. It is intended for collectors, demonstrations, synchronized displays, experimentation, and preservation of functional hardware. It does not replace official firmware, repair worn batteries, or guarantee compatibility with every operating-system and firmware combination.
 
 The live backend uses the unofficial open-source [`spherov2`](https://pypi.org/project/spherov2/) Python library together with [`bleak`](https://pypi.org/project/bleak/) for Bluetooth Low Energy communication.
+
+## Companion Android and iOS projects
+
+Separate companion projects are also available for Android and iOS devices. They are designed as portable demonstration players rather than full replacements for the desktop Control Deck. Demonstration scenes are created and edited here in the desktop application, where commands for multiple robots can be arranged into complete sequences and saved as Control Deck JSON files. Send the resulting `r2d2_macro.json` file to the mobile device, import it into the Android or iOS companion application, and the device can run the entire prepared demonstration sequence without rebuilding the scene manually. This makes it possible to design and test complex shows on the desktop, then carry only a phone or tablet for the final presentation.
+
+- [Control Deck for Android](https://github.com/YOUR-USERNAME/control-deck-android)
+- [Control Deck for iOS](https://github.com/YOUR-USERNAME/control-deck-ios)
+
+Replace `YOUR-USERNAME` in both links with the GitHub account or organization that hosts the companion repositories.
 
 ## A short history of Sphero Star Wars droids
 
