@@ -1,6 +1,6 @@
 # Droids Control for Windows
 
-Control Deck is a single-file Python desktop application for discovering, connecting to, monitoring, and controlling compatible Sphero Star Wars droids. If you do not know what are droids, see details below.
+Droids Control for Windows is a single-file Python desktop application for discovering, connecting to, monitoring, and controlling compatible Sphero Star Wars droids. If you do not know what are droids, see details below.
 
 It provides a native animation discovery, telemetry, LED control, connection recovery, and reusable multi-robot macro scenes. The application can run directly from `r2d2_app.py` or be packaged as a standalone Windows executable.
 
@@ -36,7 +36,7 @@ It provides a native animation discovery, telemetry, LED control, connection rec
 
 Sphero's licensed Star Wars droids combined unusually expressive physical hardware with Bluetooth control, lights, sound, sensors, and model-specific animations. The original mobile experience was built around a branded app and the movie-release cycle. Years later, the hardware can still be useful, but owners may encounter changing mobile-platform compatibility, unavailable legacy software, aging batteries, and limited control options.
 
-Control Deck provides a desktop-oriented way to continue using compatible droids through their BLE interfaces. It is intended for collectors, demonstrations, synchronized displays, experimentation, and preservation of functional hardware. It does not replace official firmware, repair worn batteries, or guarantee compatibility with every operating-system and firmware combination.
+Droids Control for Windows provides a desktop-oriented way to continue using compatible droids through their BLE interfaces. It is intended for collectors, demonstrations, synchronized displays, experimentation, and preservation of functional hardware. It does not replace official firmware, repair worn batteries, or guarantee compatibility with every operating-system and firmware combination.
 
 The live backend uses the unofficial open-source [`spherov2`](https://pypi.org/project/spherov2/) Python library together with [`bleak`](https://pypi.org/project/bleak/) for Bluetooth Low Energy communication.
 
@@ -44,8 +44,8 @@ The live backend uses the unofficial open-source [`spherov2`](https://pypi.org/p
 
 Separate companion projects are also available for Android and iOS devices. They are designed as portable demonstration players rather than full replacements for the desktop Control Deck. Demonstration scenes are created and edited here in the desktop application, where commands for multiple robots can be arranged into complete sequences and saved as Control Deck JSON files. Send the resulting `r2d2_macro.json` file to the mobile device, import it into the Android or iOS companion application, and the device can run the entire prepared demonstration sequence without rebuilding the scene manually. This makes it possible to design and test complex shows on the desktop, then carry only a phone or tablet for the final presentation.
 
-- [Control Deck for Android](https://github.com/JGUIMOBILEDEVELOPING/SPHERO-DROIDS-DEMO-ANDROID)
-- [Control Deck for iOS](https://github.com/JGUIMOBILEDEVELOPING/SPHERO-DROIDS-DEMO-IOS)
+- [Droids Control Deck for Android](https://github.com/JGUIMOBILEDEVELOPING/SPHERO-DROIDS-DEMO-ANDROID)
+- [Droids Control Deck for iOS](https://github.com/JGUIMOBILEDEVELOPING/SPHERO-DROIDS-DEMO-IOS)
 
 ## A short history of Sphero Star Wars droids
 
@@ -144,7 +144,7 @@ Availability of individual commands, animations, battery data, and sensors depen
 
 | Path | Purpose |
 | --- | --- |
-| `r2d2_app.py` | Complete Control Deck source application |
+| `r2d2_app.py` | Complete Droids Control for Windows source application |
 | `iconw.png` | Runtime window icon |
 | `requirements.txt` | Pinned Python package versions |
 | `README.md` | Project history, installation, usage, and build guide |
@@ -164,7 +164,7 @@ The tested and recommended source environment is 64-bit Python 3.11 on 64-bit Wi
 4. Charge the robots before the first test.
 5. Keep them close to the computer during discovery.
 
-Traditional manual pairing in Windows Settings is normally unnecessary because Control Deck discovers the droids as BLE devices.
+Traditional manual pairing in Windows Settings is normally unnecessary because Droids Control discovers the droids as BLE devices.
 
 ### 2. Install Python 3.11
 
@@ -172,7 +172,7 @@ Download a 64-bit Python 3.11 installer from [python.org](https://www.python.org
 
 - enable **Add python.exe to PATH**;
 - keep **pip** selected;
-- keep **tcl/tk and IDLE** selected because Control Deck uses Tkinter;
+- keep **tcl/tk and IDLE** selected because Droids Control for Windows uses Tkinter;
 - install the Python launcher when offered.
 
 Open a new PowerShell window and verify the installation:
@@ -182,19 +182,19 @@ py -3.11 --version
 py -3.11 -m pip --version
 ```
 
-### 3. Download or clone Control Deck
+### 3. Download or clone Droids Control for Windows
 
 With Git installed:
 
 ```powershell
-git clone https://github.com/YOUR-USERNAME/control-deck.git
-cd control-deck
+git clone https://github.com/JGUIMOBILEDEVELOPING/SPHERO-DROIDS-WINDOWS.git
+cd droids-control-windows
 ```
 
 Without Git, download the repository ZIP from GitHub, extract it, and open PowerShell inside the extracted directory. In File Explorer, right-click the folder background and choose **Open in Terminal**, or use:
 
 ```powershell
-cd "C:\path\to\control-deck"
+cd "C:\path\to\droids-control-windows"
 ```
 
 Verify that the required files are present:
@@ -232,7 +232,7 @@ Upgrade packaging tools first:
 python -m pip install --upgrade pip setuptools wheel
 ```
 
-Install the pinned Control Deck requirements and all of their dependencies:
+Install the pinned Droids Control requirements and all of their dependencies:
 
 ```powershell
 python -m pip install -r requirements.txt
