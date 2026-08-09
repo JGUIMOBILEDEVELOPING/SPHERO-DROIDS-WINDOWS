@@ -498,19 +498,19 @@ Control Deck does not request or store email addresses or mail credentials.
 
 ## Screenshots
 
-<img src="docs/images/screenshot1.jpg"
+<img src="docs/screenshots/screenshot1.jpg"
      alt="Droids Control for Windows screenshot"
      width="55%">
 
-<img src="docs/images/screenshot2.jpg"
+<img src="docs/screenshots/screenshot2.jpg"
      alt="Droids Control for Windows screenshot"
      width="55%">
 
-<img src="docs/images/screenshot3.jpg"
+<img src="docs/screenshots/screenshot3.jpg"
      alt="Droids Control for Windows screenshot"
      width="55%">
 
-<img src="docs/images/screenshot4.jpg"
+<img src="docs/screenshots/screenshot4.jpg"
      alt="Droids Control for Windows screenshot"
      width="55%">
 
