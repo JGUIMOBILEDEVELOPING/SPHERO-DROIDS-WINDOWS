@@ -11,7 +11,7 @@ It provides a native animation discovery, telemetry, LED control, connection rec
      alt="Droids Control for Windows"
      width="100%">
 
-<img src="docs/images/infographic2.png"
+<img src="docs/screenshots/infographic2.png"
      alt="Droids Control for Windows"
      width="100%">
 
