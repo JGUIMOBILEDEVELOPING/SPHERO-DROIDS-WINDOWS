@@ -5,7 +5,10 @@ Control Deck is a single-file Python desktop application for discovering, connec
 It provides a dark technical interface for individual and group control, native animation discovery, telemetry, LED control, connection recovery, and reusable multi-robot macro scenes. The application can run directly from `r2d2_app.py` or be packaged as a standalone Windows executable.
 
 > [!IMPORTANT]
-> This is an unofficial community project. It is not affiliated with or endorsed by Sphero, Disney, Lucasfilm, or the Star Wars franchise. Product names and trademarks belong to their respective owners.
+> This is an unofficial privaate (open community) project. It is not affiliated with or endorsed by Sphero, Disney, Lucasfilm, or the Star Wars franchise. Product names and trademarks belong to their respective owners.
+
+![Control Deck system log and connected robots](docs/screenshots/infographic.png)
+
 
 ![Control Deck system log and connected robots](docs/screenshots/control-deck-system-log.png)
 
