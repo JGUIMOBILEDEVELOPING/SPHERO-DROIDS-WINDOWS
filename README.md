@@ -8,12 +8,12 @@ It provides a native animation discovery, telemetry, LED control, connection rec
 > This is an unofficial privaate (open community) project. It is not affiliated with or endorsed by Sphero, Disney, Lucasfilm, or the Star Wars franchise. Product names and trademarks belong to their respective owners.
 
 <img src="docs/screenshots/infographic.png"
-     alt="Droids Control Deck Android interface"
+     alt="Droids Control for Windows"
      width="100%">
 
-<img src="docs/images/app-screenshot.png"
-     alt="Droids Control Deck Android interface"
-     width="55%">
+<img src="docs/images/infographic2.png"
+     alt="Droids Control for Windows"
+     width="100%">
 
 ## Contents
 
@@ -498,22 +498,24 @@ Control Deck does not request or store email addresses or mail credentials.
 
 ## Screenshots
 
-Place current PNG screenshots in [`docs/screenshots`](docs/screenshots) using lowercase kebab-case filenames:
+<img src="docs/images/app-screenshot1.png"
+     alt="Droids Control for Windows"
+     width="55%">
 
-- `control-deck-overview.png`
-- `control-deck-system-log.png`
-- `control-deck-gesture-matrix.png`
-- `control-deck-telemetry.png`
-- `control-deck-macros-matrix.png`
-- `control-deck-macro-editor.png`
+<img src="docs/images/app-screenshot2.png"
+     alt="Droids Control for Windows"
+     width="55%">
 
-Use descriptive Markdown alt text and a repository-relative path:
+<img src="docs/images/app-screenshot3.png"
+     alt="Droids Control for Windows"
+     width="55%">
 
-```markdown
-![Control Deck Macros Matrix](docs/screenshots/control-deck-macros-matrix.png)
-```
+<img src="docs/images/app-screenshot4.png"
+     alt="Droids Control for Windows"
+     width="55%">
 
-Recommended screenshot size is 1600×900 or larger. Use PNG for sharp interface text. Before publishing, hide personal email addresses, Bluetooth addresses, device identifiers, and unrelated desktop content.
+
+
 
 ## Troubleshooting
 
