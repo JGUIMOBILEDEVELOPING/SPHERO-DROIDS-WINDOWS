@@ -1,12 +1,70 @@
-Copyright © 2026 JGUI.NET
-All Rights Reserved.
+DROIDS CONTROL DECK NON-COMMERCIAL LICENSE
+Version 1.0
 
-No permission is granted to copy, modify, distribute, sublicense, sell, or create
-derivative works from this software except with prior written permission from
-the copyright holder.
+Copyright (c) 2026 JGUI.NET
 
-The source code is made publicly viewable for reference, testing, maintenance,
-and collaboration unless a separate written license states otherwise.
+1. Permission Granted
 
-Third-party trademarks, product names, character names and other intellectual
-property remain the property of their respective owners.
+Permission is hereby granted, free of charge, to any person obtaining a copy
+of this software and associated files (the "Software"), to use, copy, modify,
+adapt, merge, publish, and distribute the Software, and to create private or
+public derivative versions of the Software, provided that all such use is
+strictly non-commercial.
+
+2. Non-Commercial Use Only
+
+The Software may not be used, sold, sublicensed, distributed, hosted, included
+in a paid product or service, or otherwise exploited for commercial purposes.
+
+For the purposes of this License, "commercial purposes" means any activity
+primarily intended for commercial advantage or monetary compensation, whether
+direct or indirect.
+
+3. Attribution Required
+
+Any copy of the Software, whether original or modified, and any derivative work
+or redistributed version must retain:
+
+- this License text,
+- the copyright notice,
+- and a clear notice that the original project was created by JGUI.NET.
+
+If the Software is modified, the modified version must also clearly state that
+changes were made and that it is not the original version.
+
+4. Redistribution
+
+Redistribution in source code form is permitted for non-commercial purposes only,
+provided that the conditions of this License are met.
+
+Redistribution in compiled or packaged form is also permitted for non-commercial
+purposes only, provided that the conditions of this License are met and this
+License is included or referenced in accompanying documentation.
+
+5. No Trademark or Brand Rights
+
+This License does not grant permission to use the name "JGUI.NET", the project
+name, logos, branding elements, or other identifying marks in a way that implies
+official endorsement, affiliation, or authorship of modified versions without
+prior written permission.
+
+6. No Warranty
+
+THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+FITNESS FOR A PARTICULAR PURPOSE, AND NON-INFRINGEMENT.
+
+7. Limitation of Liability
+
+IN NO EVENT SHALL THE AUTHOR OR COPYRIGHT HOLDER BE LIABLE FOR ANY CLAIM,
+DAMAGES, OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT, OR
+OTHERWISE, ARISING FROM, OUT OF, OR IN CONNECTION WITH THE SOFTWARE OR THE USE
+OR OTHER DEALINGS IN THE SOFTWARE.
+
+8. Commercial Licensing
+
+If you wish to use the Software for commercial purposes, you must obtain prior
+written permission from the copyright holder.
+
+Contact: JGUI.NET  jguigj@gmail.com
+
