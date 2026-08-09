@@ -1,4 +1,4 @@
-# Control Deck
+# Droids Control for Windows
 
 Control Deck is a single-file Python desktop application for discovering, connecting to, monitoring, and controlling compatible Sphero Star Wars droids. If you do not know what are droids, see details below.
 
