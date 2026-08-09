@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""R2D2 Control Deck — single-file desktop application.
+"""Droids Control for Windows — single-file desktop application.
 
 Run:
     python r2d2_app.py
@@ -32,7 +32,7 @@ try:
     import tkinter as tk
 except ImportError as exc:  # Friendly message for minimal Linux installations.
     raise SystemExit(
-        "R2D2 Control Deck requires Tkinter. "
+        "Droids Control for Windows requires Tkinter. "
         "Windows/macOS: use a full Python 3 installation. "
         "Linux Debian/Ubuntu: sudo apt install python3-tk"
     ) from exc
@@ -148,9 +148,9 @@ class TechScrollbar(tk.Canvas):
 def tech_scrollbar(master, **options) -> TechScrollbar:
     return TechScrollbar(master, **options)
 
-CONFIG_PATH = Path.home() / ".r2d2_control_deck.json"
-MACRO_PATH = Path(__file__).resolve().with_name("r2d2_macro.json")
-LOG_PATH = Path(__file__).resolve().with_name("r2d2_log.txt")
+CONFIG_PATH = Path.home() / ".droids_control.json"
+MACRO_PATH = Path(__file__).resolve().with_name("droids_control_macro.json")
+LOG_PATH = Path(__file__).resolve().with_name("droids_control_log.txt")
 AUTO_CONNECT_RETRY_LIMIT = 2
 
 
@@ -410,6 +410,7 @@ class SpheroV2Backend:
         self._lock = threading.RLock()
         self._scan_lock = threading.Lock()
         self._robot_locks = {spec.robot_id: threading.RLock() for spec in ROBOT_SPECS}
+        self._scan_reports: Dict[str, str] = {}
         self._stopped = False
         self._loaded = False
 
@@ -417,6 +418,8 @@ class SpheroV2Backend:
         if self._loaded:
             return
         try:
+            import asyncio
+            import bleak
             from spherov2 import scanner
             from spherov2.commands.animatronic import Animatronic
             from spherov2.helper import to_bytes
@@ -430,7 +433,99 @@ class SpheroV2Backend:
             raise RuntimeError(
                 "BLE libraries are missing. Run: pip install spherov2 bleak"
             ) from exc
+
+        class FreshBleakAdapter:
+            """Keep the BLEDevice returned by the scan for the connection.
+
+            spherov2 0.12.1 normally discards that object and later gives only
+            its address to BleakClient.  On Windows this triggers another
+            implicit discovery and can raise BleakDeviceNotFoundError even for
+            a device found moments earlier.
+            """
+
+            _devices: Dict[str, object] = {}
+            _devices_lock = threading.Lock()
+
+            @staticmethod
+            def _key(value) -> str:
+                return str(value or "").strip().upper()
+
+            @classmethod
+            def _remember(cls, device):
+                if device is None:
+                    return None
+                with cls._devices_lock:
+                    address = cls._key(getattr(device, "address", None))
+                    name = cls._key(getattr(device, "name", None))
+                    if address:
+                        cls._devices[address] = device
+                    if name:
+                        cls._devices[name] = device
+                return device
+
+            @classmethod
+            def scan_toys(cls, timeout: float = 5.0):
+                devices = asyncio.run(bleak.BleakScanner.discover(timeout=timeout))
+                for device in devices:
+                    cls._remember(device)
+                return devices
+
+            @classmethod
+            def scan_toy(cls, name: str, timeout: float = 5.0):
+                device = asyncio.run(bleak.BleakScanner.find_device_by_filter(
+                    lambda candidate, advertisement: (
+                        getattr(advertisement, "local_name", None) == name or
+                        getattr(candidate, "name", None) == name),
+                    timeout=timeout))
+                return cls._remember(device)
+
+            def __init__(self, address):
+                self.__event_loop = asyncio.new_event_loop()
+                with self._devices_lock:
+                    scanned_device = self._devices.get(self._key(address))
+                # Preserve the previous address-based behaviour for every
+                # other model. Only legacy BB-8 uses the fresh BLEDevice path.
+                is_bb8 = str(getattr(scanned_device, "name", "") or "").upper().startswith("BB-")
+                connection_target = scanned_device if is_bb8 else address
+                self.__device = bleak.BleakClient(connection_target, timeout=10.0)
+                self.__lock = threading.Lock()
+                self.__thread = threading.Thread(
+                    target=self.__event_loop.run_forever,
+                    name="ControlDeck-BLE",
+                    daemon=True)
+                self.__thread.start()
+                try:
+                    self.__execute(self.__device.connect())
+                except Exception:
+                    self.close(False)
+                    raise
+
+            def __execute(self, coroutine):
+                with self.__lock:
+                    future = asyncio.run_coroutine_threadsafe(
+                        coroutine, self.__event_loop)
+                    return future.result()
+
+            def close(self, disconnect=True):
+                try:
+                    if disconnect:
+                        self.__execute(self.__device.disconnect())
+                finally:
+                    with self.__lock:
+                        self.__event_loop.call_soon_threadsafe(
+                            self.__event_loop.stop)
+                    self.__thread.join(timeout=5.0)
+                    if not self.__thread.is_alive():
+                        self.__event_loop.close()
+
+            def set_callback(self, uuid, callback):
+                self.__execute(self.__device.start_notify(uuid, callback))
+
+            def write(self, uuid, data):
+                self.__execute(self.__device.write_gatt_char(uuid, data, True))
+
         self._scanner = scanner
+        self._adapter_class = FreshBleakAdapter
         self._animatronic_command = Animatronic
         self._to_bytes = to_bytes
         self._api_class = SpheroEduAPI
@@ -448,11 +543,72 @@ class SpheroV2Backend:
         return (exc.__class__.__name__ == "BleakDeviceNotFoundError" or
                 "was not found" in str(exc).lower())
 
+    def _model_for_toy(self, toy) -> Optional[str]:
+        """Return the most specific Droids Control for Windows model for a scanned toy."""
+        # R2Q5 inherits from R2D2, and R2D2 inherits from BB9E.  This order is
+        # therefore also required when the spherov2 scanner creates wrappers.
+        for model_id in ("r2q5", "r2d2", "bb9e", "bb8e"):
+            if isinstance(toy, self._types[model_id]):
+                return model_id
+        return None
+
+    @staticmethod
+    def _scan_toy_label(toy) -> str:
+        name = str(getattr(toy, "name", None) or "NO-NAME")
+        address = str(getattr(toy, "address", None) or "NO-ADDRESS")
+        return f"{name} ({address})"
+
+    def _scan_model_candidates(self, robot_id: str, model_id: str,
+                               preferred=None) -> List[object]:
+        """Scan one model, then fall back to an ordered all-droid scan.
+
+        A targeted spherov2 scan can occasionally return no BB-8 on Windows
+        even though the same advertisement is visible during a general scan.
+        The second pass deliberately uses all supported classes in inheritance-
+        safe order, then filters the result back to the requested model.
+        """
+        target_type = self._types[model_id]
+        ordered_types = [self._types[key]
+                         for key in ("r2q5", "r2d2", "bb9e", "bb8e")]
+        preferred_name = (getattr(preferred, "name", None)
+                          if preferred is not None else None)
+        plans = []
+        if preferred_name:
+            plans.append(("exact-name", 8.0, [target_type], [preferred_name]))
+        plans.extend((
+            ("model-filter", 10.0, [target_type], None),
+            ("all-supported", 10.0, ordered_types, None),
+        ))
+
+        report = []
+        for label, timeout, toy_types, toy_names in plans:
+            if self._stopped:
+                break
+            try:
+                with self._scan_lock:
+                    kwargs = {"timeout": timeout, "toy_types": toy_types,
+                              "adapter": self._adapter_class}
+                    if toy_names is not None:
+                        kwargs["toy_names"] = toy_names
+                    scanned = self._scanner.find_toys(**kwargs)
+            except Exception as exc:
+                report.append(f"{label}=ERROR {type(exc).__name__}: {exc or '<empty>'}")
+                continue
+
+            labels = ", ".join(self._scan_toy_label(toy) for toy in scanned)
+            report.append(f"{label}={len(scanned)} [{labels or 'none'}]")
+            matches = [toy for toy in scanned
+                       if self._model_for_toy(toy) == model_id]
+            if matches:
+                self._scan_reports[robot_id] = "; ".join(report)
+                return matches
+
+        self._scan_reports[robot_id] = "; ".join(report) or "scan cancelled"
+        return []
+
     def _rescan_instance(self, robot_id: str, model_id: str, preferred=None):
         """Refresh a stale BLE object without taking another slot's device."""
-        with self._scan_lock:
-            toys = self._scanner.find_toys(
-                timeout=10.0, toy_types=[self._types[model_id]])
+        toys = self._scan_model_candidates(robot_id, model_id, preferred)
 
         used_keys = {
             self._device_key(toy)
@@ -461,6 +617,10 @@ class SpheroV2Backend:
         }
         available = [toy for toy in toys if self._device_key(toy) not in used_keys]
         if not available:
+            used = ", ".join(sorted(str(key) for key in used_keys)) or "none"
+            self._scan_reports[robot_id] = (
+                f"{self._scan_reports.get(robot_id, 'no scan report')}; "
+                f"unused_matches=0; assigned_devices=[{used}]")
             return None
 
         chosen = None
@@ -488,31 +648,34 @@ class SpheroV2Backend:
         self._load_library()
         if self._stopped:
             return []
-        toy_types = list(self._types.values())
+        # Keep the scanner wrapper selection inheritance-safe as well as the
+        # classification loop below.  A dict insertion order is not sufficient
+        # because R2Q5 is a subclass of R2D2.
+        toy_types = [self._types[key]
+                     for key in ("r2q5", "r2d2", "bb9e", "bb8e")]
         with self._scan_lock:
-            toys = self._scanner.find_toys(timeout=10.0, toy_types=toy_types)
+            toys = self._scanner.find_toys(
+                timeout=10.0, toy_types=toy_types,
+                adapter=self._adapter_class)
         found: List[str] = []
         used_addresses = {self._device_key(toy) for toy in self._toys.values()}
         for toy in toys:
-            # Most specialized classes must be checked first:
-            # R2Q5 inherits from R2D2, and R2D2 inherits from BB9E.
-            for model_id in ("r2q5", "r2d2", "bb9e", "bb8e"):
-                toy_type = self._types[model_id]
-                if isinstance(toy, toy_type):
-                    address = self._device_key(toy)
-                    if address in used_addresses:
-                        existing = next((rid for rid, saved in self._toys.items()
-                                         if self._device_key(saved) == address), None)
-                        if existing and existing not in found:
-                            found.append(existing)
-                        break
-                    free_slot = next((instance_id(model_id, slot) for slot in (1, 2)
-                                      if instance_id(model_id, slot) not in self._toys), None)
-                    if free_slot:
-                        self._toys[free_slot] = toy
-                        used_addresses.add(address)
-                        found.append(free_slot)
-                    break
+            model_id = self._model_for_toy(toy)
+            if model_id is None:
+                continue
+            address = self._device_key(toy)
+            if address in used_addresses:
+                existing = next((rid for rid, saved in self._toys.items()
+                                 if self._device_key(saved) == address), None)
+                if existing and existing not in found:
+                    found.append(existing)
+                continue
+            free_slot = next((instance_id(model_id, slot) for slot in (1, 2)
+                              if instance_id(model_id, slot) not in self._toys), None)
+            if free_slot:
+                self._toys[free_slot] = toy
+                used_addresses.add(address)
+                found.append(free_slot)
         return found
 
     def connect(self, robot_id: str) -> bool:
@@ -524,7 +687,13 @@ class SpheroV2Backend:
             if robot_id not in self._toys:
                 # Manual tile click: rescan this model and take an unused device.
                 if self._rescan_instance(robot_id, model_id) is None:
-                    return False
+                    toy_type = self._types[model_id].toy_type
+                    expected = (getattr(toy_type, "prefix", None) or
+                                getattr(toy_type, "filter_prefix", None) or model_id)
+                    raise RuntimeError(
+                        f"No matching unassigned device for slot {robot_id}; "
+                        f"model={model_id}, expected_name_prefix={expected}, "
+                        f"scan_report={self._scan_reports.get(robot_id, 'unavailable')}")
             if robot_id in self._apis:
                 return True
 
@@ -1381,7 +1550,7 @@ class ControlDeck(tk.Tk):
         self.bind("<Configure>", self._debounced_geometry_save)
         self._animate()
         self._update_clock()
-        self.log("SYSTEM", f"Control Deck initialized / {self.backend.mode_label}", "ok")
+        self.log("SYSTEM", f"Droids Control for Windows initialized / {self.backend.mode_label}", "ok")
         self.log("UI", self.icon_status, "ok" if self.window_icon else "warn")
         if self.log_file_error:
             self._log_error("LOG_FILE_INIT", self.log_file_error, path=LOG_PATH)
@@ -1695,8 +1864,8 @@ class ControlDeck(tk.Tk):
         self.macro_export_email.set(email)
         self._save_settings()
         self._save_macro_file()
-        subject = "Control Deck macros JSON"
-        body = "Control Deck macro scenes for Android / iOS import."
+        subject = "Droids Control for Windows macros JSON"
+        body = "Drodis Control for Windows macro scenes for Android / iOS import."
         opened = False
         try:
             if sys.platform == "win32" and shutil.which("powershell.exe"):
@@ -1713,7 +1882,7 @@ class ControlDeck(tk.Tk):
                     'on run argv\nset recipientAddress to item 1 of argv\n'
                     'set attachmentPath to item 2 of argv\n'
                     'tell application "Mail"\nset m to make new outgoing message with properties '
-                    '{subject:"Control Deck macros JSON", content:"Control Deck macro scenes for Android / iOS import.", visible:true}\n'
+                    '{subject:"Droids Control for Windows macros JSON", content:"Droids Control for Windows macro scenes for Android / iOS import.", visible:true}\n'
                     'tell m\nmake new to recipient at end of to recipients with properties {address:recipientAddress}\n'
                     'make new attachment with properties {file name:POSIX file attachmentPath} at after the last paragraph\n'
                     'end tell\nactivate\nend tell\nend run')
@@ -1749,7 +1918,7 @@ class ControlDeck(tk.Tk):
             f"Attach this file:\n{MACRO_PATH.resolve()}", parent=self)
 
     def _configure_window(self) -> None:
-        self.title("Control Deck")
+        self.title("Droids Control for Windows")
         self.configure(bg=BG)
         # The window may collapse to the robot rail; the right workspace is
         # intentionally clipped when the user chooses a narrow width.
@@ -1825,7 +1994,7 @@ class ControlDeck(tk.Tk):
 
             shell32 = ctypes.windll.shell32
             shell32.SetCurrentProcessExplicitAppUserModelID.argtypes = [ctypes.c_wchar_p]
-            shell32.SetCurrentProcessExplicitAppUserModelID("R2D2.ControlDeck")
+            shell32.SetCurrentProcessExplicitAppUserModelID("DroidsControlForWindows")
             flags = 0x0001 | 0x0002 | 0x0004 | 0x0020  # NOSIZE | NOMOVE | NOZORDER | FRAMECHANGED
             user32.SetWindowPos.argtypes = [ctypes.c_void_p, ctypes.c_void_p, ctypes.c_int,
                                             ctypes.c_int, ctypes.c_int, ctypes.c_int, ctypes.c_uint]
@@ -1896,7 +2065,7 @@ class ControlDeck(tk.Tk):
         logo.create_text(26, 26, text="R", fill=TEXT, font=("TkDefaultFont", 11, "bold"))
         brand = tk.Frame(header, bg=BG)
         brand.pack(side="left")
-        tk.Label(brand, text="CONTROL DECK", bg=BG, fg=TEXT,
+        tk.Label(brand, text="DROIDS CONTROL FOR WINDOWS", bg=BG, fg=TEXT,
                  font=("TkDefaultFont", 15, "bold")).pack(anchor="w")
         tk.Label(brand, text="ASTROMECH COMMAND NETWORK  /  SECURE BT MESH", bg=BG, fg=MUTED,
                  font=("TkDefaultFont", 7)).pack(anchor="w")
@@ -3124,7 +3293,7 @@ class ControlDeck(tk.Tk):
         tk.Frame(root, bg=LINE, height=1).pack(fill="x", pady=(15, 0))
         footer = tk.Frame(root, bg=BG)
         footer.pack(fill="x", pady=(10, 0))
-        tk.Label(footer, text="R2D2 CONTROL DECK  v1.0", bg=BG, fg=MUTED,
+        tk.Label(footer, text="DROIDS CONTROL FOR WINDOWS  v1.0", bg=BG, fg=MUTED,
                  font=("TkDefaultFont", 7)).pack(side="left")
         tk.Label(footer, text="●  BT ADAPTER READY", bg=BG, fg=GREEN,
                  font=("TkDefaultFont", 7, "bold")).pack(side="right")
@@ -4326,7 +4495,7 @@ def main() -> None:
         app = ControlDeck()
         app.mainloop()
     except tk.TclError as exc:
-        print(f"Unable to start the R2D2 Control Deck interface: {exc}")
+        print(f"Unable to start the Droids Control for Windows interface: {exc}")
 
 
 if __name__ == "__main__":
