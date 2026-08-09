@@ -1,16 +1,19 @@
 # Control Deck
 
-Control Deck is a single-file Python desktop application for discovering, connecting to, monitoring, and controlling compatible Sphero Star Wars droids over Bluetooth Low Energy.
+Control Deck is a single-file Python desktop application for discovering, connecting to, monitoring, and controlling compatible Sphero Star Wars droids. If you do not know what are droids, see details below.
 
-It provides a dark technical interface for individual and group control, native animation discovery, telemetry, LED control, connection recovery, and reusable multi-robot macro scenes. The application can run directly from `r2d2_app.py` or be packaged as a standalone Windows executable.
+It provides a native animation discovery, telemetry, LED control, connection recovery, and reusable multi-robot macro scenes. The application can run directly from `r2d2_app.py` or be packaged as a standalone Windows executable.
 
 > [!IMPORTANT]
 > This is an unofficial privaate (open community) project. It is not affiliated with or endorsed by Sphero, Disney, Lucasfilm, or the Star Wars franchise. Product names and trademarks belong to their respective owners.
 
-![Control Deck system log and connected robots](docs/screenshots/infographic.png)
+<img src="docs/screenshots/infographic.png"
+     alt="Droids Control Deck Android interface"
+     width="100%">
 
-
-![Control Deck system log and connected robots](docs/screenshots/control-deck-system-log.png)
+<img src="docs/images/app-screenshot.png"
+     alt="Droids Control Deck Android interface"
+     width="55%">
 
 ## Contents
 
@@ -41,10 +44,8 @@ The live backend uses the unofficial open-source [`spherov2`](https://pypi.org/p
 
 Separate companion projects are also available for Android and iOS devices. They are designed as portable demonstration players rather than full replacements for the desktop Control Deck. Demonstration scenes are created and edited here in the desktop application, where commands for multiple robots can be arranged into complete sequences and saved as Control Deck JSON files. Send the resulting `r2d2_macro.json` file to the mobile device, import it into the Android or iOS companion application, and the device can run the entire prepared demonstration sequence without rebuilding the scene manually. This makes it possible to design and test complex shows on the desktop, then carry only a phone or tablet for the final presentation.
 
-- [Control Deck for Android](https://github.com/YOUR-USERNAME/control-deck-android)
-- [Control Deck for iOS](https://github.com/YOUR-USERNAME/control-deck-ios)
-
-Replace `YOUR-USERNAME` in both links with the GitHub account or organization that hosts the companion repositories.
+- [Control Deck for Android](https://github.com/JGUIMOBILEDEVELOPING/SPHERO-DROIDS-DEMO-ANDROID)
+- [Control Deck for iOS](https://github.com/JGUIMOBILEDEVELOPING/SPHERO-DROIDS-DEMO-IOS)
 
 ## A short history of Sphero Star Wars droids
 
