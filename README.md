@@ -31,6 +31,8 @@ It provides a native animation discovery, telemetry, LED control, connection rec
 - [Runtime files and macro transfer](#runtime-files-and-macro-transfer)
 - [Troubleshooting](#troubleshooting)
 - [Safety](#safety)
+- [Changelog](CHANGELOG.md)
+- [Releases](../../releases)
 
 ## Why this project exists
 
@@ -620,3 +622,7 @@ When changing frozen-application paths, remember that `__file__` points inside t
 ## License
 
 Released under the [MIT License](LICENSE).
+
+## Changelog
+
+See the [complete changelog](CHANGELOG.md) for version history and release notes.
