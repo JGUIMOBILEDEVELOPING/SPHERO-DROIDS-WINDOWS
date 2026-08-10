@@ -2,7 +2,7 @@
 """Droids Control for Windows — single-file desktop application.
 
 Run:
-    python r2d2_app.py
+    python droids_control_for_windows.py
 
 The default mode uses real Bluetooth Low Energy through the ``spherov2``
 and ``bleak`` packages. Install: ``pip install spherov2 bleak``.
